@@ -2,38 +2,39 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import signupSchema from './signupSchema';
-import { Navigate } from 'react-router-dom';
 import { useNavigate } from "react-router-dom";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { auth } from "../firebase";
 
 function SignupForm() {
   const navigate = useNavigate();
+
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm({ resolver: yupResolver(signupSchema) });
 
-  const onSubmit = (data) => {
-     const existingUser = JSON.parse(localStorage.getItem(data.email));
-      if (existingUser) {
-          alert("Email is already registered!");
-        } else {
-            const userData = {
-                Username: data.Username,
-                email: data.email,
-                password: data.password,
-                confirmPassword: data.confirmPassword,
-            };
-            localStorage.setItem(data.email, JSON.stringify(userData));
-            alert(data.Username+ " has been successfully registered");
-            localStorage.setItem("token", true);
-            navigate ("/students");
-        }
-    };
+  const onSubmit = async (data) => {
+    try {
+      // 1. Create account
+      const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
+
+      // 2. Add display name
+      await updateProfile(userCredential.user, {
+        displayName: data.username
+      });
+
+      // 3. Navigate to students page
+      navigate("/students");
+    } catch (error) {
+      alert(error.message);
+    }
+  };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-      <h2 className="text-3xl font-bold text-center text-gray-800 text-green-600 italic">Sign Up</h2>
+      <h2 className="text-3xl font-bold text-center text-green-600 italic">Sign Up</h2>
 
       <div>
         <label htmlFor="username" className="block text-sm font-medium text-gray-700 italic">Username</label>
@@ -93,5 +94,4 @@ function SignupForm() {
   );
 }
 
-export default SignupForm
-
+export default SignupForm;

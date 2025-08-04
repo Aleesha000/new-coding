@@ -2,9 +2,9 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import loginSchema from './loginSchema';
-import { Navigate } from 'react-router-dom';
 import { useNavigate } from "react-router-dom";
-
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../firebase";
 
 function LoginForm() {
   const navigate = useNavigate();
@@ -14,20 +14,15 @@ function LoginForm() {
     formState: { errors },
   } = useForm({ resolver: yupResolver(loginSchema) });
 
-  const onSubmit = (data) => {
-    const userData = JSON.parse(localStorage.getItem(data.email));
-    if (userData) {
-      if (userData.password === data.password) {
-        // alert(userData.Username + " you are successfully logged in!");
-        // localStorage.setItem("token", true);
-        localStorage.setItem("token", data.email);
-        // localStorage.setItem("token", user.name);
-        navigate("/students");
-      } else {
-        alert("Password is incorrect!");
-      }
-    } else {
-      alert("Email or Password is incorrect!");
+  const onSubmit = async (data) => {
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, data.email, data.password);
+      const user = userCredential.user;
+      localStorage.setItem("token", user.email);
+      localStorage.setItem("name", user.displayName || "User");
+      navigate("/students");
+    } catch (error) {
+      alert("Login failed: " + error.message);
     }
   };
 
@@ -69,6 +64,4 @@ function LoginForm() {
   );
 }
 
-export default LoginForm
-
-
+export default LoginForm;
