@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaUserCircle } from 'react-icons/fa';
 
@@ -22,6 +22,8 @@ function StudentPage() {
   });
   const [selectedColor, setSelectedColor] = useState('#bfdbfe');
   const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef(null);
+
 
   const logout = () => {
     localStorage.clear();
@@ -155,10 +157,24 @@ function StudentPage() {
     return () => unsubscribe();
   }, []);
 
+  useEffect(() => {
+  const handleClickOutside = (event) => {
+    if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+      setShowDropdown(false);
+    }
+  };
+
+  document.addEventListener("mousedown", handleClickOutside);
+  return () => {
+    document.removeEventListener("mousedown", handleClickOutside);
+  };
+}, []);
+
+
   return (
     <div className='min-h-screen bg-gray-100 relative p-6'>
       {/* Dropdown */}
-      <div className="absolute top-4 right-6 z-50 text-black">
+      <div className="absolute top-4 right-6 z-50 text-black" ref={dropdownRef}>
         <div className="relative inline-block text-left">
           <button
             onClick={() => setShowDropdown(!showDropdown)}
@@ -171,7 +187,7 @@ function StudentPage() {
             <div className="absolute right-0 mt-2 w-28 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
               <button
                 onClick={logout}
-                className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                className="block w-full text-left px-4 py-2 text-sm text-red-700 hover:bg-gray-100 text-center font-bold"
               >
                 Logout
               </button>
