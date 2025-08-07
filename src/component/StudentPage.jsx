@@ -230,7 +230,7 @@ function StudentPage() {
           </div>
 
           {/* Student Cards */}
-          <div className='flex flex-wrap justify-center gap-4'>
+          <div className='flex flex-wrap justify-start gap-4'>
             {students.map((student, index) => (
               <div
                 key={student.id}
@@ -307,7 +307,7 @@ function StudentPage() {
 
       {/* Toast Container */}
       <ToastContainer
-        position="bottom-center"
+        position="top-right"
         theme="dark"
         autoClose={3000}
         hideProgressBar={false}
